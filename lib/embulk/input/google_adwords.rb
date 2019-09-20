@@ -38,6 +38,7 @@ module Embulk
               "skip_report_summary" => true
             }
           },
+          "api_version" => config.param("api_version", :string),
           "report_type" => config.param("report_type", :string),
           "fields" => config.param("fields", :array),
           "conditions" => config.param("conditions", :array, default: []),
@@ -63,12 +64,6 @@ module Embulk
 
       # TODO
       # def self.guess(config)
-      #   sample_records = [
-      #     {"example"=>"a", "column"=>1, "value"=>0.1},
-      #     {"example"=>"a", "column"=>2, "value"=>0.2},
-      #   ]
-      #   columns = Guess::SchemaGuess.from_hash_records(sample_records)
-      #   return {"columns" => columns}
       # end
 
       def init
@@ -107,14 +102,12 @@ module Embulk
         return task_report
       end
 
-      API_VERSION = :v201705
-
       def query_report_results(query, &block)
         # AdwordsApi::Api
         adwords = AdwordsApi::Api.new(task["adwords_api_options"])
 
         # Get report utilities for the version.
-        report_utils = adwords.report_utils(API_VERSION)
+        report_utils = adwords.report_utils(task["api_version"].to_sym)
 
         # Allowing rows with zero impressions to show is not supported with AWQL.
         adwords.include_zero_impressions = false
