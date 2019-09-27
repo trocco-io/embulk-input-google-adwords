@@ -5,7 +5,6 @@ in:
     #                                     authentication informations                                     #
     #   for the details, refer to https://developers.google.com/adwords/api/docs/guides/first-api-call    #
     #######################################################################################################
-    api_version: v201809 # version of api to use
     auth_method: OAuth2 # authentication method should be OAuth2
 
     # OAuth2 client ID and client secret

@@ -38,7 +38,6 @@ module Embulk
               "skip_report_summary" => true
             }
           },
-          "api_version" => config.param("api_version", :string),
           "report_type" => config.param("report_type", :string),
           "fields" => config.param("fields", :array),
           "conditions" => config.param("conditions", :array, default: []),
@@ -107,7 +106,7 @@ module Embulk
         adwords = AdwordsApi::Api.new(task["adwords_api_options"])
 
         # Get report utilities for the version.
-        report_utils = adwords.report_utils(task["api_version"].to_sym)
+        report_utils = adwords.report_utils
 
         # Allowing rows with zero impressions to show is not supported with AWQL.
         adwords.include_zero_impressions = false
