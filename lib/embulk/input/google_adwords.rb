@@ -41,7 +41,7 @@ module Embulk
           "report_type" => config.param("report_type", :string),
           "fields" => config.param("fields", :array),
           "conditions" => config.param("conditions", :array, default: []),
-          "daterange" => config.param("daterange", :string, default: "")
+          "daterange" => config.param("daterange", :hash, default: {})
         }
 
         raise ConfigError.new("The parameter report_type must not be empty.") if task["report_type"].empty?
@@ -75,8 +75,7 @@ module Embulk
 
         query = "SELECT " + selectors + " FROM " + task["report_type"]
         query << " WHERE " + conditions unless conditions.empty?
-        query << " DURING " + task["daterange"] unless task["daterange"].empty?
-
+        query << " DURING #{task["daterange"]["min"]},#{task["daterange"]["max"]}" unless task["daterange"].empty?
         begin
           query_report_results(query) do |row|
             page_builder.add row
