@@ -86,29 +86,28 @@ module Embulk
         check_connection(query)
 
         query << " DURING #{task["daterange"]["min"]},#{task["daterange"]["max"]}" unless task["daterange"].empty?
-        begin
-          query_report_results(query) do |row|
-            next if row.empty?
-            page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
-          end
 
-          # Authorization error.
-        rescue AdsCommon::Errors::OAuth2VerificationRequired => e
-          raise ConfigError.new(e.message)
-
-          # HTTP errors.
-        rescue AdsCommon::Errors::HttpError => e
-          raise ConfigError.new(e.message)
-
-          # API errors.
-        rescue AdwordsApi::Errors::ReportError => e
-          raise ConfigError.new(e.message)
+        query_report_results(query) do |row|
+          next if row.empty?
+          page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
         end
 
         page_builder.finish
 
         task_report = {}
         return task_report
+
+        # Authorization error.
+      rescue AdsCommon::Errors::OAuth2VerificationRequired => e
+        raise ConfigError.new(e.message)
+
+        # HTTP errors.
+      rescue AdsCommon::Errors::HttpError => e
+        raise ConfigError.new(e.message)
+
+        # API errors.
+      rescue AdwordsApi::Errors::ReportError => e
+        raise ConfigError.new(e.message)
       end
 
       def query_report_results(query, &block)
