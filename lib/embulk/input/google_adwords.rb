@@ -121,7 +121,17 @@ module Embulk
           last_line = rows.delete_at(-1)
           rows.each do |row|
             row.chomp!
-            block.call row.split(",")
+            json_data_array = row.scan(/\"\[{.+?}\]\"/)
+            data_array = row.gsub!(/\"\[{.+?}\]\"/, "json_data").split(",").map do |data|
+              if data == "json_data"
+                value = json_data_array.first
+                json_data_array.shift
+              else
+                value = data
+              end
+              value
+            end
+            block.call data_array
           end
         end
 
