@@ -1,4 +1,5 @@
 require "adwords_api"
+require "csv"
 
 module Embulk
   module Input
@@ -120,12 +121,11 @@ module Embulk
           end
           last_line = rows.delete_at(-1)
           rows.each do |row|
-            row.chomp!
-            block.call row.split(",")
+            block.call CSV.parse(row.chomp!).first
           end
         end
 
-        block.call last_line.chomp.split(",")
+        block.call CSV.parse(last_line.chomp).first
       end
 
       def formated_row(fields, row, convert_column_type, use_micro_yen)
