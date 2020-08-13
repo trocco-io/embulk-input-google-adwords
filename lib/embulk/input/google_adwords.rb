@@ -1,4 +1,5 @@
 require "adwords_api"
+require "csv"
 
 module Embulk
   module Input
@@ -120,22 +121,11 @@ module Embulk
           end
           last_line = rows.delete_at(-1)
           rows.each do |row|
-            row.chomp!
-            json_data_array = row.scan(/\"\[{.+?}\]\"/)
-            data_array = row.gsub!(/\"\[{.+?}\]\"/, "json_data").split(",").map do |data|
-              if data == "json_data"
-                value = json_data_array.first
-                json_data_array.shift
-              else
-                value = data
-              end
-              value
-            end
-            block.call data_array
+            block.call CSV.parse(row.chomp!).first
           end
         end
 
-        block.call last_line.chomp.split(",")
+        block.call CSV.parse(last_line.chomp).first
       end
 
       def formated_row(fields, row, convert_column_type, use_micro_yen)
