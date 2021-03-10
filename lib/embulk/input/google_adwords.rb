@@ -91,6 +91,7 @@ module Embulk
         query_report_results(query) do |row|
           next if row.nil? || row.empty?
           page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
+          page_builder.flush
         end
 
         page_builder.finish
