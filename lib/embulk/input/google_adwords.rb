@@ -112,20 +112,12 @@ module Embulk
       end
 
       def query_report_results(query, &block)
-        last_line = ""
-
         report_utils.download_report_as_stream_with_awql(query, "CSV") do |lines|
-          rows = []
-          (last_line + lines).lines do |line|
-            rows << line
-          end
-          last_line = rows.delete_at(-1)
-          rows.each do |row|
-            block.call CSV.parse(row.chomp!).first
+          return unless lines
+          lines.lines do |line|
+            block.call CSV.parse(line.chop!).first
           end
         end
-
-        block.call CSV.parse(last_line.chomp).first
       end
 
       def formated_row(fields, row, convert_column_type, use_micro_yen)
