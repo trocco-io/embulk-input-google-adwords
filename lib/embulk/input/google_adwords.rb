@@ -113,7 +113,6 @@ module Embulk
 
       def query_report_results(query, &block)
         report_utils.download_report_as_stream_with_awql(query, "CSV") do |lines|
-          return unless lines
           lines.lines do |line|
             block.call CSV.parse(line.chop!).first
           end
