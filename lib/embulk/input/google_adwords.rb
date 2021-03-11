@@ -125,7 +125,10 @@ module Embulk
           page_builder.flush
         end
 
-        block.call CSV.parse(last_line.chomp).first
+        row = CSV.parse(last_line.chomp).first
+        unless row.nil? || row.empty?
+          page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
+        end
       end
 
       def formated_row(fields, row, convert_column_type, use_micro_yen)
