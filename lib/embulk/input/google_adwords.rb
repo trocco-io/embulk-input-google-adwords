@@ -88,10 +88,7 @@ module Embulk
 
         query << " DURING #{task["daterange"]["min"]},#{task["daterange"]["max"]}" unless task["daterange"].empty?
 
-        query_report_results(query) do |row|
-          next if row.nil? || row.empty?
-          page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
-        end
+        add_report_result_to_page_builder(query)
 
         page_builder.finish
 
@@ -111,7 +108,7 @@ module Embulk
         raise ConfigError.new(e.message)
       end
 
-      def query_report_results(query, &block)
+      def add_report_result_to_page_builder(query)
         last_line = ""
 
         report_utils.download_report_as_stream_with_awql(query, "CSV") do |lines|
@@ -120,12 +117,18 @@ module Embulk
             rows << line
           end
           last_line = rows.delete_at(-1)
-          rows.each do |row|
-            block.call CSV.parse(row.chomp!).first
+          rows.each do |csv_str|
+            row =  CSV.parse(csv_str.chomp!).first
+            next if row.nil? || row.empty?
+            page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
           end
+          page_builder.flush
         end
 
-        block.call CSV.parse(last_line.chomp).first
+        row = CSV.parse(last_line.chomp).first
+        unless row.nil? || row.empty?
+          page_builder.add formated_row(task["fields"], row, task["convert_column_type"], task["use_micro_yen"])
+        end
       end
 
       def formated_row(fields, row, convert_column_type, use_micro_yen)
